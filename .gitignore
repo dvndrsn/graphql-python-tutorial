@@ -102,3 +102,12 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+
+# vscode
+.vscode/
+
+# misc
+.DS_Store
+
+# Pipenv - lockfile not cross platform compatible
+Pipfile.lock
