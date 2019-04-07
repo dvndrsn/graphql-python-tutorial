@@ -1,0 +1,37 @@
+[[source]]
+url = "https://pypi.python.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[requires]
+python_version = "3.7"
+
+[packages]
+graphene = "*"
+Django = "*"
+graphene-django = "*"
+django-cors-headers = "*"
+django-rest-framework = "*"
+graphql-core = "*"
+django-extensions = "*"
+invoke = "*"
+
+[dev-packages]
+pylint = "*"
+pylint-django = "*"
+ipdb = "*"
+mypy = "*"
+django-stubs = "*"
+factory-boy = "*"
+
+[scripts]
+migrate_db = "python manage.py migrate"
+setup_seed = "python manage.py loaddata story/fixture.json"
+setup_superuser = "python manage.py createsuperuser"
+
+check_style = "pylint api story cyoa"
+check_types = "mypy api story cyoa"
+test = "python manage.py test"
+
+start = "python manage.py runserver"
+django_shell = "python manage.py shell_plus"

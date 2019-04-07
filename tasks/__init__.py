@@ -1,0 +1,1 @@
+from tasks.tasks import namespace
