@@ -1,0 +1,40 @@
+# Exercise 1!
+# Let's play with queries in GraphiQL!
+# - run `invoke start` to run queries against `localhost:8000/graphql`
+# - copy this file into the query editor window
+# try:
+# - adding fields (use autocomplete!)
+# - removing fields
+# - changing value for `display` argument  on `authorName` field (use autocomplete!)
+query stories {
+  stories {
+    id
+    title
+    authorName(display: LAST_FIRST)
+  }
+}
+
+# If you want to explore further, try queries against a public API, like GitHub.
+# GitHub's V4 GraphQL API is a great example of a Relay-compliant GraphQL API, with rich domain.
+#
+# Just login using your github credentials to explore!
+# https://developer.github.com/v4/explorer/
+
+# Here is a sample query for github to get you started:
+
+# query myGithubComments {
+#   viewer {
+#     login
+#     bio
+#     issueComments(last: 10) {
+#       edges {
+#         node {
+#           createdAt
+#           id
+#           body
+#           url
+#         }
+#       }
+#     }
+#   }
+# }
