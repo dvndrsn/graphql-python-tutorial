@@ -17,7 +17,6 @@ class TestStoriesQuery(TestCase):
         query getStories {
             stories {
                 %s
-
             }
         }
         ''' % ' '.join(fields)
@@ -48,18 +47,24 @@ class TestStoriesQuery(TestCase):
             id=2,
             title='Hello world',
             subtitle='Hello GraphQL',
+            description='A big adventure',
+            published_date='2019-05-04',
         )
         query_string = self.build_query_with_fields(
             'id',
             'title',
             'subtitle',
+            'description',
+            'publishedYear',
         )
 
         result = self.schema.execute(query_string, context=self.request)
 
-        self.assertIsNone(result.errors)
-        self.assertDictEqual(result.data['stories'][0], {
+        self.assertIsNone(result.errors, msg=f'Query errors prevented execution for {query_string}')
+        self.assertDictEqual(dict(result.data['stories'][0]), {
             'id': '2',
             'title': 'Hello world',
             'subtitle': 'Hello GraphQL',
-        })
+            'description': 'A big adventure',
+            'publishedYear': '2019',
+        }, msg=f'Query data in result does not match for: {query_string}')
