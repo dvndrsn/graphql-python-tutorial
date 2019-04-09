@@ -1,9 +1,38 @@
-# Exercise 3b!
-# Test the Connection Field to paginate through results
+# Exercise 4!
+# Test the new author fields added to the schema
 # - run `invoke start` to run queries against `localhost:8000/graphql`
 # - copy this file into the query editor window
 # - copy the below text into Query Variables
-# {"afterCursor": null}
+# {"afterCursor": null, "authorId": "QXV0aG9yVHlwZTo1", "storyId": "U3RvcnlUeXBlOjI="}
+query pageForwardThroughAuthors($afterCursor: String) {
+  authors(first: 3, after: $afterCursor) {
+    pageInfo {
+      endCursor
+      hasNextPage
+    }
+    edges {
+      cursor
+      node {
+        id
+        firstName
+        lastName
+      }
+    }
+  }
+}
+
+query dataForOneAuthor($authorId: ID!) {
+  author: node(id: $authorId) {
+    id
+    ... on AuthorType {
+      fullName(display: LAST_FIRST)
+      twitterAccount
+    }
+  }
+}
+
+# Exercise 3b!
+# Test the Connection Field to paginate through results
 # try:
 # - run `pageForwardThroughStories` query with $afterCursor variable
 # - use `cursor` or `endCursor` field value from query results as a new $afterCursor value

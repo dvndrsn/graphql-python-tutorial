@@ -3,11 +3,7 @@ from typing import Any, Iterable, Optional
 import graphene
 
 from story import models
-
-
-class AuthorDisplayNameEnum(graphene.Enum):
-    FIRST_LAST = models.Author.DISPLAY_FIRST_LAST
-    LAST_FIRST = models.Author.DISPLAY_LAST_FIRST
+from api.query.author import AuthorDisplayNameEnum
 
 
 class StoryType(graphene.ObjectType):
