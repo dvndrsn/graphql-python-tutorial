@@ -33,6 +33,8 @@ class StoryType(graphene.ObjectType):
     id = graphene.ID()
     title = graphene.String()
     subtitle = graphene.String()
+    description = graphene.String()
+    published_year = graphene.String()
     author_name = graphene.String(
         args={
             'display': graphene.Argument(
@@ -51,6 +53,10 @@ class StoryType(graphene.ObjectType):
     @staticmethod
     def resolve_author_name(root: models.Story, info: graphene.ResolveInfo, display: str) -> str:
         return root.author.full_name(display)
+
+    @staticmethod
+    def resolve_published_year(root: models.Story, info: graphene.ResolveInfo) -> str:
+        return str(root.published_date.year)
 
 
 class Query(graphene.ObjectType):
