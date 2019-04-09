@@ -50,8 +50,14 @@ class StoryType(graphene.ObjectType):
             return None
 
 
+class StoryConnection(graphene.Connection):
+
+    class Meta:
+        node = StoryType
+
+
 class Query(graphene.ObjectType):
-    stories = graphene.List(StoryType)
+    stories = graphene.ConnectionField(StoryConnection)
     node = graphene.Node.Field()
 
     @staticmethod

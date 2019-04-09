@@ -1,9 +1,11 @@
 mutation createStory {
   createStory(
-    title: "boy"
-    subtitle: "howdy"
-    description: "a greeting"
-    publishedYear: "2010"
+    input: {
+      title: "boy"
+      subtitle: "howdy"
+      description: "a greeting"
+      publishedYear: "2010"
+    }
   ) {
     story {
       id

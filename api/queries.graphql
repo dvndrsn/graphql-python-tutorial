@@ -1,3 +1,32 @@
+# Exercise 3b!
+# Test the Connection Field to paginate through results
+# - run `invoke start` to run queries against `localhost:8000/graphql`
+# - copy this file into the query editor window
+# - copy the below text into Query Variables
+# {"afterCursor": null}
+# try:
+# - run `pageForwardThroughStories` query with $afterCursor variable
+# - use `cursor` or `endCursor` field value from query results as a new $afterCursor value
+# - experiment with pagination and the query
+query pageForwardThroughStories($afterCursor: String) {
+  stories(first: 3, after: $afterCursor) {
+    pageInfo {
+      endCursor
+      hasNextPage
+    }
+    edges {
+      cursor
+      node {
+        id
+        title
+        subtitle
+        description
+        authorName(display: FIRST_LAST)
+      }
+    }
+  }
+}
+
 # Exercise 3!
 # Test the fields that you just added to the schema!
 # - run `invoke start` to run queries against `localhost:8000/graphql`
@@ -21,6 +50,10 @@ query dataForOneStory($storyId: ID!) {
 # Use this query to get a new story ID
 query allStoryIds {
   stories {
-    id
+    edges {
+      node {
+        id
+      }
+    }
   }
 }

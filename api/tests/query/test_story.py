@@ -2,8 +2,8 @@ from django.test import TestCase
 import graphene
 
 from api.query.story import Query, StoryType
+from api.tests.util import request_with_loaders, connection_to_list
 from api.utils import to_global_id
-from api.tests.util import request_with_loaders
 from story.factories import StoryFactory
 
 
@@ -17,7 +17,11 @@ class TestStoriesQuery(TestCase):
         query = '''
         query getStories {
             stories {
-                %s
+                edges {
+                    node {
+                        %s
+                    }
+                }
             }
         }
         ''' % ' '.join(fields)
@@ -31,7 +35,7 @@ class TestStoriesQuery(TestCase):
         result = self.schema.execute(query_string, context=self.request)
 
         self.assertIsNone(result.errors)
-        self.assertListEqual(result.data['stories'], [
+        self.assertListEqual(connection_to_list(result.data['stories']), [
             {'id': to_global_id(StoryType, 2)},
             {'id': to_global_id(StoryType, 5)},
         ])
