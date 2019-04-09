@@ -1,4 +1,4 @@
-from typing import Any, List, Iterable, Optional # pylint: disable=unused-import
+from typing import Any, Iterable, Optional
 
 import graphene
 
@@ -31,21 +31,60 @@ class AuthorType(graphene.ObjectType):
     # - Ensure AuthorType has the following String fields in the GraphQL schema:
     #   - id, firstName, lastName, twitterAccount, fullName
     # - AuthorType should implement the Node Interface (as StoryType does)
-    dummy = graphene.String(description='Enter your stuff here')
+    class Meta:
+        interfaces = (graphene.Node, )
+
+    first_name = graphene.String()
+    last_name = graphene.String()
+    twitter_account = graphene.String()
+    full_name = graphene.String(
+        args={
+            'display': graphene.Argument(
+                AuthorDisplayNameEnum,
+                required=True,
+                description='Display format to use for Full Name of Author - default FIRST_LAST.'
+            )
+        }
+    )
 
     # AuthorType resovler changes:
     # - AuthorType.fullName field should have similar implementation as StoryType.fullName
     # - AuthorType should implement `get_node` to fetch a single Author from the ORM
     # - AuthorType should implement `is_type_of` to disambiguate inline fragments in our queries
+    @staticmethod
+    def resolve_full_name(root: models.Author, info: graphene.ResolveInfo, display: str) -> str:
+        return root.full_name(display)
+
+    @classmethod
+    def is_type_of(cls, root: Any, _: graphene.ResolveInfo) -> bool:
+        return isinstance(root, models.Author)
+
+    @classmethod
+    def get_node(cls, info: graphene.ResolveInfo, id_: str) -> Optional[models.Author]:
+        try:
+            key = int(id_)
+            return models.Author.objects.get(pk=key)
+        except models.Author.DoesNotExist:
+            return None
 
 
 # Add a new type:
 # - Implement AuthorConnection with AuthorType as node
+class AuthorConnection(graphene.Connection):
+
+    class Meta:
+        node = AuthorType
+
 
 class Query(graphene.ObjectType):
     # Query schema changes:
     # - Add Query.authors connection field to paginate over authors
     node = graphene.Node.Field()
+    authors = graphene.ConnectionField(AuthorConnection)
 
     # Query resolver changes:
     # - Add a resolver for authors
+    @staticmethod
+    def resolve_authors(root: None, info: graphene.ResolveInfo, **kwargs
+                       ) -> Iterable[models.Author]:
+        return models.Author.objects.all()
