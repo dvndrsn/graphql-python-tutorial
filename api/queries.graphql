@@ -1,15 +1,26 @@
-# Exercise 2!
+# Exercise 3!
 # Test the fields that you just added to the schema!
 # - run `invoke start` to run queries against `localhost:8000/graphql`
 # - copy this file into the query editor window
+# - copy the below text into Query Variables
+# {"storyId": "U3RvcnlUeXBlOjI="}
 # try:
-# - querying the new fields you've added to StoryType!
-query stories {
+# - query for one story data using the node field and $storyId variable
+# - run the `allStoryIds` to find another value for the  $storyId variable
+# - change the variable value and run `dataForOneStory` query again
+query dataForOneStory($storyId: ID!) {
+  story: node(id: $storyId) {
+    id
+    ... on StoryType {
+      title
+      authorName
+    }
+  }
+}
+
+# Use this query to get a new story ID
+query allStoryIds {
   stories {
     id
-    title
-    publishedYear
-    authorName(display: LAST_FIRST)
-    description
   }
 }

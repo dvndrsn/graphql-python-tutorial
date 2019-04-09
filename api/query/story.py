@@ -1,4 +1,4 @@
-from typing import Iterable
+from typing import Any, Iterable, Optional
 
 import graphene
 
@@ -11,26 +11,10 @@ class AuthorDisplayNameEnum(graphene.Enum):
 
 
 class StoryType(graphene.ObjectType):
-    # Exercise 2:
-    # Add publishedYear and description fields to StoryType in our GraphQL schema.
-    # Graphene needs field schema definition and a resolver function for each field.
-    # - run `invoke test` to verify the changes using a test case
-    # - run `invoke start` to run queries against `localhost:8000/graphql`
-    # - sample queries available in `api/queries.graphql`
 
-    # Our Django Story model has the following attributes that we can use to resolve our new fields:
-    # - description - string
-    # - published_date - datetime.date
-    #     (https://docs.python.org/3/library/datetime.html#available-types)
-    #
-    # Resolving `description` field may be easier than resolving just the year of the
-    # Story `published_date`!
+    class Meta:
+        interfaces = (graphene.Node, )
 
-    # This is our schema defintion.
-    # We tell Graphene what the field name and type should be:
-    # - <field_name> = graphene.<ScalarType>()
-    # - Graphene automatically camelCases our snake_cased field names for the GraphQL schema
-    id = graphene.ID()
     title = graphene.String()
     subtitle = graphene.String()
     description = graphene.String()
@@ -45,11 +29,6 @@ class StoryType(graphene.ObjectType):
         }
     )
 
-    # These are our resolver functions.
-    # - def resolve_<field_name>(root, info): return root.<data_to_resolve>
-    # - root in this case is our Django Story model, resolved from Query.resolve_stories.
-    # - title and subtile fields are resolved implicitly since the field matches the attribute on
-    #     root (the Story model)
     @staticmethod
     def resolve_author_name(root: models.Story, info: graphene.ResolveInfo, display: str) -> str:
         return root.author.full_name(display)
@@ -58,9 +37,22 @@ class StoryType(graphene.ObjectType):
     def resolve_published_year(root: models.Story, info: graphene.ResolveInfo) -> str:
         return str(root.published_date.year)
 
+    @classmethod
+    def is_type_of(cls, root: Any, _: graphene.ResolveInfo) -> bool:
+        return isinstance(root, models.Story)
+
+    @classmethod
+    def get_node(cls, info: graphene.ResolveInfo, id_: str) -> Optional[models.Story]:
+        try:
+            key = int(id_)
+            return models.Story.objects.get(pk=key)
+        except models.Story.DoesNotExist:
+            return None
+
 
 class Query(graphene.ObjectType):
     stories = graphene.List(StoryType)
+    node = graphene.Node.Field()
 
     @staticmethod
     def resolve_stories(root: None, info: graphene.ResolveInfo, **kwargs) -> Iterable[models.Story]:
