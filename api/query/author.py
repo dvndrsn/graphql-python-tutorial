@@ -11,26 +11,24 @@ class AuthorDisplayNameEnum(graphene.Enum):
 
 
 class AuthorType(graphene.ObjectType):
-    # Exercise 4!
-    # Let's evolve the schema to include an AuthorType and AuthorConnection!
+    # Exercise 4b.
+    # Add AuthorType.stories and Stories.author fields.
     # - run `invoke test` to verify the changes using a test case
     # - run `invoke start` to run queries against `localhost:8000/graphql`
     # - sample queries available in `api/queries.graphql`
 
-    # The `models.Author` object has the following attributes to use to resolve our new fields:
-    # - id - ID
-    # - String - first_name, last_name, twitter_account
-    # - function for formatting names - full_name(display) -> str
+    # Our ORM object, `models.Author` has attributes to resolve these fields.
+    # - a one to many field - `stories`
 
     # Remember:
-    # - Refer to `api/query/story.py` for examples of similar implementation.
+    # - graphene.Field can take any GraphQL type (such as ObjectType). It can also take a module
+    #     string like 'api.query.passage.PassageType' to help avoid circular imports.
     # - REFERENCE.md may be helpful to brush up on Django ORM as well!
-    # - Graphene auto-camelCases fields from our Python code!
+    # - keyword arguments need to be accepted for ConnectionField resolvers even tho graphene does
+    #     the heavy lifting
 
-    # AuthorType schema changes:
-    # - Ensure AuthorType has the following String fields in the GraphQL schema:
-    #   - id, firstName, lastName, twitterAccount, fullName
-    # - AuthorType should implement the Node Interface (as StoryType does)
+    # AuthorType schema changes"
+    # - add a connection field `stories` that points a paginated connection of StoryType
     class Meta:
         interfaces = (graphene.Node, )
 
@@ -42,15 +40,14 @@ class AuthorType(graphene.ObjectType):
             'display': graphene.Argument(
                 AuthorDisplayNameEnum,
                 required=True,
+                default_value=AuthorDisplayNameEnum.FIRST_LAST,
                 description='Display format to use for Full Name of Author - default FIRST_LAST.'
             )
         }
     )
 
-    # AuthorType resovler changes:
-    # - AuthorType.fullName field should have similar implementation as StoryType.fullName
-    # - AuthorType should implement `get_node` to fetch a single Author from the ORM
-    # - AuthorType should implement `is_type_of` to disambiguate inline fragments in our queries
+    # AuthorType resolver changes:
+    # - leverage one-to-many connection from author to stories for `stories` field
     @staticmethod
     def resolve_full_name(root: models.Author, info: graphene.ResolveInfo, display: str) -> str:
         return root.full_name(display)
@@ -68,8 +65,6 @@ class AuthorType(graphene.ObjectType):
             return None
 
 
-# Add a new type:
-# - Implement AuthorConnection with AuthorType as node
 class AuthorConnection(graphene.Connection):
 
     class Meta:
@@ -77,13 +72,10 @@ class AuthorConnection(graphene.Connection):
 
 
 class Query(graphene.ObjectType):
-    # Query schema changes:
-    # - Add Query.authors connection field to paginate over authors
+
     node = graphene.Node.Field()
     authors = graphene.ConnectionField(AuthorConnection)
 
-    # Query resolver changes:
-    # - Add a resolver for authors
     @staticmethod
     def resolve_authors(root: None, info: graphene.ResolveInfo, **kwargs
                        ) -> Iterable[models.Author]:

@@ -2,9 +2,10 @@ from django.test import TestCase
 import graphene
 
 from api.query.author import Query, AuthorType
+from api.query.story import StoryType
 from api.tests.util import connection_to_list, request_with_loaders
 from api.utils import to_global_id
-from story.factories import AuthorFactory
+from story.factories import AuthorFactory, StoryFactory
 
 
 class TestAuthorConnection(TestCase):
@@ -129,3 +130,21 @@ class TestAuthorNodeQuery(TestCase):
         self.assertIsNone(result.errors, msg=f'Query errors prevented execution for {query_string}')
         self.assertEqual(result.data['author']['fullName'], 'Buddy Holly',
                          msg=f'Query data in result does not match for: {query_string}')
+
+    def test_author_node_query__returns_related_stories(self):
+        author = AuthorFactory(id=5)
+        StoryFactory.create(id=2, author=author)
+        StoryFactory.create(id=4, author=author)
+        query_string = self.build_query_with_fields(
+            'id',
+            'stories { edges { node { id } } }',
+        )
+        variables = {'id': to_global_id(AuthorType, 5)}
+
+        result = self.schema.execute(query_string, context=self.request, variables=variables)
+
+        self.assertIsNone(result.errors, msg=f'Query errors prevented execution for {query_string}')
+        self.assertEqual(connection_to_list(result.data['author']['stories']), [
+            {'id': to_global_id(StoryType, 2)},
+            {'id': to_global_id(StoryType, 4)},
+        ], msg=f'Query data in result does not match for: {query_string}')

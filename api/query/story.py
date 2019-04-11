@@ -7,7 +7,22 @@ from api.query.author import AuthorDisplayNameEnum
 
 
 class StoryType(graphene.ObjectType):
+    # Exercise 4b.
+    # Add AuthorType.stories and Stories.author fields.
+    # - run `invoke test` to verify the changes using a test case
+    # - run `invoke start` to run queries against `localhost:8000/graphql`
+    # - sample queries available in `api/queries.graphql`
 
+    # Our ORM object, `models.Story` has attributes to resolve these fields.
+    # - a many to one field - `author`
+
+    # Remember:
+    # - graphene.Field can take any GraphQL type (such as ObjectType). It can also take a module
+    #     string like 'api.query.passage.PassageType' to help avoid circular imports.
+    # - REFERENCE.md may be helpful to brush up on Django ORM as well!
+
+    # AuthorType schema changes"
+    # - add a field `author` that points a single AuthorType
     class Meta:
         interfaces = (graphene.Node, )
 
@@ -25,6 +40,8 @@ class StoryType(graphene.ObjectType):
         }
     )
 
+    # StoryType resolver changes:
+    # - leverage many-to-one connection from stories to author for `author` field
     @staticmethod
     def resolve_author_name(root: models.Story, info: graphene.ResolveInfo, display: str) -> str:
         return root.author.full_name(display)

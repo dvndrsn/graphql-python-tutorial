@@ -2,9 +2,10 @@ from django.test import TestCase
 import graphene
 
 from api.query.story import Query, StoryType
-from api.tests.util import request_with_loaders, connection_to_list
+from api.query.author import AuthorType
+from api.tests.util import connection_to_list, request_with_loaders
 from api.utils import to_global_id
-from story.factories import StoryFactory
+from story.factories import StoryFactory, AuthorFactory
 
 
 class TestStoriesQuery(TestCase):
@@ -34,11 +35,11 @@ class TestStoriesQuery(TestCase):
 
         result = self.schema.execute(query_string, context=self.request)
 
-        self.assertIsNone(result.errors)
+        self.assertIsNone(result.errors, msg=f'Query errors prevented execution for {query_string}')
         self.assertListEqual(connection_to_list(result.data['stories']), [
             {'id': to_global_id(StoryType, 2)},
             {'id': to_global_id(StoryType, 5)},
-        ])
+        ], msg=f'Query data in result does not match for: {query_string}')
 
 
 class TestStoryNodeQuery(TestCase):
@@ -65,8 +66,9 @@ class TestStoryNodeQuery(TestCase):
 
         result = self.schema.execute(query_string, context=self.request, variables=variables)
 
-        self.assertIsNone(result.errors)
-        self.assertDictEqual(result.data, {'story': None})
+        self.assertIsNone(result.errors, msg=f'Query errors prevented execution for {query_string}')
+        self.assertDictEqual(result.data, {'story': None},
+                             msg=f'Query data in result does not match for: {query_string}')
 
     def test_story_node_query__returns_model_fields(self):
         StoryFactory.create(
@@ -94,4 +96,22 @@ class TestStoryNodeQuery(TestCase):
             'subtitle': 'Hello GraphQL',
             'description': 'A big adventure',
             'publishedYear': '2019',
+        }, msg=f'Query data in result does not match for: {query_string}')
+
+    def test_story_node_query__returns_related_author(self):
+        StoryFactory.create(
+            id=2,
+            author=AuthorFactory(id=5)
+        )
+        query_string = self.build_query_with_fields(
+            'id',
+            'author { id }',
+        )
+        variables = {'id': to_global_id(StoryType, 2)}
+
+        result = self.schema.execute(query_string, context=self.request, variables=variables)
+
+        self.assertIsNone(result.errors, msg=f'Query errors prevented execution for {query_string}')
+        self.assertDictEqual(dict(result.data['story']['author']), {
+            'id': to_global_id(AuthorType, 5),
         }, msg=f'Query data in result does not match for: {query_string}')
