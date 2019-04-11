@@ -3,9 +3,10 @@ import graphene
 
 from api.query.story import Query, StoryType
 from api.query.author import AuthorType
+from api.query.passage import PassageType
 from api.tests.util import connection_to_list, request_with_loaders
 from api.utils import to_global_id
-from story.factories import StoryFactory, AuthorFactory
+from story.factories import StoryFactory, AuthorFactory, PassageFactory
 
 
 class TestStoriesQuery(TestCase):
@@ -115,3 +116,20 @@ class TestStoryNodeQuery(TestCase):
         self.assertDictEqual(dict(result.data['story']['author']), {
             'id': to_global_id(AuthorType, 5),
         }, msg=f'Query data in result does not match for: {query_string}')
+
+    def test_story_node_query__returns_related_passages(self):
+        story = StoryFactory.create(id=2)
+        PassageFactory.create(id=10, story=story)
+        PassageFactory.create(id=5, story=story)
+        query_string = self.build_query_with_fields(
+            'id',
+            'passages { edges { node { id } } }',
+        )
+        variables = {'id': to_global_id(StoryType, 2)}
+
+        result = self.schema.execute(query_string, context=self.request, variables=variables)
+
+        self.assertListEqual(connection_to_list(result.data['story']['passages']), [
+            {'id': to_global_id(PassageType, 5)},
+            {'id': to_global_id(PassageType, 10)},
+        ])

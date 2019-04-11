@@ -1,10 +1,53 @@
 # Exercise 5.
-# Run a few queries like `storyWithAuthor` and `authorWithStories.
-# Montor the Django logs for the number of queries fired as you add more data.
+# Run `storiesWithAuthor` and `chooseYourOwnStory` queries.
+# Montor the Django logs for the number of database queries fired with the naive solution.
 # - run `invoke start` to run queries against `localhost:8000/graphql`
 # - copy this file into the query editor window
 # - copy the below text into Query Variables
 # {"afterCursor": null, "authorId": "QXV0aG9yVHlwZTo1", "storyId": "U3RvcnlUeXBlOjI="}
+
+query storiesWithAuthor {
+  stories {
+    edges {
+      node {
+        id
+        title
+        author {
+          id
+          fullName(display: FIRST_LAST)
+        }
+      }
+    }
+  }
+}
+
+query chooseYourOwnStory($storyId: ID!) {
+  story: node(id: $storyId) {
+    id
+    ... on StoryType {
+      title
+      author {
+        fullName(display: FIRST_LAST)
+      }
+      passages {
+        edges {
+          node {
+            id
+            description
+            allChoices {
+              id
+              description
+              toPassage {
+                id
+                description
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
 
 # Exercise 4b!
 # Test the new fields connecting AuthorType and StoryType added to the schema
