@@ -1,6 +1,7 @@
-from typing import Any, Iterable, Optional
+from typing import Any, List, Optional
 
 import graphene
+from promise import Promise
 
 from story.models import Character, Passage
 
@@ -15,20 +16,17 @@ class CharacterType(graphene.ObjectType):
 
     @staticmethod
     def resolve_in_passages(root: Character, info: graphene.ResolveInfo,
-                            **kwargs) -> Iterable[Passage]:
-        return root.in_passages.all() # type: ignore
+                            **kwargs) -> Promise[List[Passage]]:
+        return info.context.loaders.passage_from_pov_character.load(root.id)
 
     @classmethod
     def is_type_of(cls, root: Any, info: graphene.ResolveInfo) -> bool:
         return isinstance(root, Character)
 
     @classmethod
-    def get_node(cls, info: graphene.ResolveInfo, id_: str) -> Optional[Character]:
-        try:
-            key = int(id_)
-            return Character.objects.get(pk=key)
-        except Character.DoesNotExist:
-            return None
+    def get_node(cls, info: graphene.ResolveInfo, decoded_id: str) -> Promise[Optional[Character]]:
+        key = int(decoded_id)
+        return info.context.loaders.character.load(key)
 
 
 

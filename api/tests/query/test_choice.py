@@ -32,7 +32,7 @@ class TestAuthorNodeQuery(TestCase):
 
         result = self.schema.execute(query_string, context=self.request, variables=variables)
 
-        self.assertEqual(result.errors, None)
+        self.assertIsNone(result.errors)
         self.assertDictEqual(result.data, {'choice': None})
 
     def test_choice_node_query__returns_model_fields(self):
@@ -50,7 +50,7 @@ class TestAuthorNodeQuery(TestCase):
 
         result = self.schema.execute(query_string, context=self.request, variables=variables)
 
-        self.assertEqual(result.errors, None)
+        self.assertIsNone(result.errors)
         self.assertDictEqual(result.data['choice'], {
             'id': to_global_id(ChoiceType, 3),
             'description': 'Do the right thing',
@@ -68,7 +68,7 @@ class TestAuthorNodeQuery(TestCase):
 
         result = self.schema.execute(query_string, context=self.request, variables=variables)
 
-        self.assertEqual(result.errors, None)
+        self.assertIsNone(result.errors)
         self.assertDictEqual(result.data['choice']['fromPassage'], {
             'id': to_global_id(PassageType, 5)
         })
@@ -84,7 +84,7 @@ class TestAuthorNodeQuery(TestCase):
 
         result = self.schema.execute(query_string, context=self.request, variables=variables)
 
-        self.assertEqual(result.errors, None)
+        self.assertIsNone(result.errors)
         self.assertDictEqual(result.data['choice']['toPassage'], {
             'id': to_global_id(PassageType, 2)
         })

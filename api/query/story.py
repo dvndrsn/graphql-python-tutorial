@@ -1,6 +1,7 @@
-from typing import Any, Iterable, Optional
+from typing import Any, Iterable, List, Optional
 
 import graphene
+from promise import Promise
 
 from story import models
 from api.query.author import AuthorDisplayNameEnum
@@ -38,25 +39,23 @@ class StoryType(graphene.ObjectType):
         return str(root.published_date.year)
 
     @staticmethod
-    def resolve_author(root: models.Story, info: graphene.ResolveInfo) -> models.Author:
-        return root.author
+    def resolve_author(root: models.Story, info: graphene.ResolveInfo) -> Promise[models.Author]:
+        return info.context.loaders.author.load(root.author_id)
 
     @staticmethod
-    def resolve_passages(root: models.Story, info: graphene.ResolveInfo
-                        ) -> Iterable[models.Passage]:
-        return root.passages.all() # type: ignore
+    def resolve_passages(root: models.Story, info: graphene.ResolveInfo,
+                         **kwargs) -> Promise[List[models.Passage]]:
+        return info.context.loaders.passage_from_story.load(root.id)
 
     @classmethod
     def is_type_of(cls, root: Any, info: graphene.ResolveInfo) -> bool:
         return isinstance(root, models.Story)
 
     @classmethod
-    def get_node(cls, info: graphene.ResolveInfo, id_: str) -> Optional[models.Story]:
-        try:
-            key = int(id_)
-            return models.Story.objects.get(pk=key)
-        except models.Story.DoesNotExist:
-            return None
+    def get_node(cls, info: graphene.ResolveInfo, decoded_id: str
+                ) -> Promise[Optional[models.Story]]:
+        key = int(decoded_id)
+        return info.context.loaders.story.load(key)
 
 
 class StoryConnection(graphene.Connection):

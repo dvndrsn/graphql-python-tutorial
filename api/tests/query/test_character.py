@@ -32,7 +32,7 @@ class TestCharacterNodeQuery(TestCase):
 
         result = self.schema.execute(query_string, context=self.request, variables=variables)
 
-        self.assertEqual(result.errors, None)
+        self.assertIsNone(result.errors)
         self.assertDictEqual(result.data, {'character': None})
 
     def test_character_node_query__returns_model_fields(self):
@@ -42,7 +42,7 @@ class TestCharacterNodeQuery(TestCase):
 
         result = self.schema.execute(query_string, context=self.request, variables=variables)
 
-        self.assertEqual(result.errors, None)
+        self.assertIsNone(result.errors)
         self.assertDictEqual(result.data['character'], {
             'id': to_global_id(CharacterType, 7),
             'name': 'Lil Bobby'
@@ -60,7 +60,7 @@ class TestCharacterNodeQuery(TestCase):
 
         result = self.schema.execute(query_string, context=self.request, variables=variables)
 
-        self.assertEqual(result.errors, None)
+        self.assertIsNone(result.errors)
         self.assertEqual(connection_to_list(result.data['character']['inPassages']), [
             {'id': to_global_id(PassageType, 4)},
             {'id': to_global_id(PassageType, 5)},

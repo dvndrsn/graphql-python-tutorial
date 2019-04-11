@@ -1,10 +1,15 @@
-# Exercise 5.
-# Run `storiesWithAuthor` and `chooseYourOwnStory` queries.
-# Montor the Django logs for the number of database queries fired with the naive solution.
+# Exercise 5b.
+# Run a `storiesWithAuthor` and `chooseYourOwnStory` queries.
+# Montor the Django logs for the number of queries fired with DataLoaders.
+# The result should be improved!
 # - run `invoke start` to run queries against `localhost:8000/graphql`
 # - copy this file into the query editor window
 # - copy the below text into Query Variables
 # {"afterCursor": null, "authorId": "QXV0aG9yVHlwZTo1", "storyId": "U3RvcnlUeXBlOjI="}
+
+# Exercise 5.
+# Run a `storiesWithAuthor` and `chooseYourOwnStory` queries.
+# Montor the Django logs for the number of queries fired as you add more data.
 
 query storiesWithAuthor {
   stories {
@@ -20,6 +25,21 @@ query storiesWithAuthor {
     }
   }
 }
+
+# N+1 Queries!
+# (0.000) SELECT "story_story"."id", "story_story"."title", "story_story"."subtitle", "story_story"."description", "story_story"."published_date", "story_story"."author_id", "story_story"."created_at", "story_story"."updated_at" FROM "story_story"; args=()
+# (0.000) SELECT "story_author"."id", "story_author"."first_name", "story_author"."last_name", "story_author"."twitter_account" FROM "story_author" WHERE "story_author"."id" = 2; args=(2,)
+# (0.000) SELECT "story_author"."id", "story_author"."first_name", "story_author"."last_name", "story_author"."twitter_account" FROM "story_author" WHERE "story_author"."id" = 3; args=(3,)
+# (0.000) SELECT "story_author"."id", "story_author"."first_name", "story_author"."last_name", "story_author"."twitter_account" FROM "story_author" WHERE "story_author"."id" = 6; args=(6,)
+# (0.000) SELECT "story_author"."id", "story_author"."first_name", "story_author"."last_name", "story_author"."twitter_account" FROM "story_author" WHERE "story_author"."id" = 6; args=(6,)
+# (0.000) SELECT "story_author"."id", "story_author"."first_name", "story_author"."last_name", "story_author"."twitter_account" FROM "story_author" WHERE "story_author"."id" = 6; args=(6,)
+# (0.000) SELECT "story_author"."id", "story_author"."first_name", "story_author"."last_name", "story_author"."twitter_account" FROM "story_author" WHERE "story_author"."id" = 6; args=(6,)
+# (0.000) SELECT "story_author"."id", "story_author"."first_name", "story_author"."last_name", "story_author"."twitter_account" FROM "story_author" WHERE "story_author"."id" = 5; args=(5,)
+# (0.000) SELECT "story_author"."id", "story_author"."first_name", "story_author"."last_name", "story_author"."twitter_account" FROM "story_author" WHERE "story_author"."id" = 5; args=(5,)
+# (0.000) SELECT "story_author"."id", "story_author"."first_name", "story_author"."last_name", "story_author"."twitter_account" FROM "story_author" WHERE "story_author"."id" = 5; args=(5,)
+# (0.000) SELECT "story_author"."id", "story_author"."first_name", "story_author"."last_name", "story_author"."twitter_account" FROM "story_author" WHERE "story_author"."id" = 5; args=(5,)
+# (0.000) SELECT "story_author"."id", "story_author"."first_name", "story_author"."last_name", "story_author"."twitter_account" FROM "story_author" WHERE "story_author"."id" = 5; args=(5,)
+# (0.000) SELECT "story_author"."id", "story_author"."first_name", "story_author"."last_name", "story_author"."twitter_account" FROM "story_author" WHERE "story_author"."id" = 7; args=(7,)
 
 query chooseYourOwnStory($storyId: ID!) {
   story: node(id: $storyId) {
@@ -48,6 +68,8 @@ query chooseYourOwnStory($storyId: ID!) {
     }
   }
 }
+
+# sooo many queries
 
 # Exercise 4b!
 # Test the new fields connecting AuthorType and StoryType added to the schema

@@ -1,6 +1,7 @@
-from typing import Any, Iterable, Optional
+from typing import Any, Iterable, Optional, List
 
 import graphene
+from promise import Promise
 
 from story import models
 
@@ -37,20 +38,18 @@ class AuthorType(graphene.ObjectType):
 
     @staticmethod
     def resolve_stories(root: models.Author, info: graphene.ResolveInfo, **kwargs
-                       ) -> Iterable[models.Story]:
-        return root.stories.all() # type: ignore
+                       ) -> Promise[List[models.Story]]:
+        return info.context.loaders.stories_from_author.load(root.id)
 
     @classmethod
     def is_type_of(cls, root: Any, info: graphene.ResolveInfo) -> bool:
         return isinstance(root, models.Author)
 
     @classmethod
-    def get_node(cls, info: graphene.ResolveInfo, id_: str) -> Optional[models.Author]:
-        try:
-            key = int(id_)
-            return models.Author.objects.get(pk=key)
-        except models.Author.DoesNotExist:
-            return None
+    def get_node(cls, info: graphene.ResolveInfo, decoded_id: str
+                ) -> Promise[Optional[models.Author]]:
+        key = int(decoded_id)
+        return info.context.loaders.author.load(key)
 
 
 class AuthorConnection(graphene.Connection):

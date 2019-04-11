@@ -1,6 +1,7 @@
 from typing import Any, Optional
 
 import graphene
+from promise import Promise
 
 from story.models import Choice, Passage
 
@@ -17,24 +18,22 @@ class ChoiceType(graphene.ObjectType):
     to_passage = graphene.Field('api.query.passage.PassageType')
 
     @staticmethod
-    def resolve_from_passage(root: Choice, info: graphene.ResolveInfo, **kwargs) -> Passage:
-        return root.from_passage
+    def resolve_from_passage(root: Choice, info: graphene.ResolveInfo,
+                             **kwargs) -> Promise[Passage]:
+        return info.context.loaders.passage.load(root.from_passage_id)
 
     @staticmethod
-    def resolve_to_passage(root: Choice, info: graphene.ResolveInfo, **kwargs) -> Passage:
-        return root.to_passage
+    def resolve_to_passage(root: Choice, info: graphene.ResolveInfo, **kwargs) -> Promise[Passage]:
+        return info.context.loaders.passage.load(root.to_passage_id)
 
     @classmethod
     def is_type_of(cls, root: Any, info: graphene.ResolveInfo) -> bool:
         return isinstance(root, Choice)
 
     @classmethod
-    def get_node(cls, info: graphene.ResolveInfo, id_: str) -> Optional[Choice]:
-        try:
-            key = int(id_)
-            return Choice.objects.get(pk=key)
-        except Choice.DoesNotExist:
-            return None
+    def get_node(cls, info: graphene.ResolveInfo, decoded_id: str) -> Promise[Optional[Choice]]:
+        key = int(decoded_id)
+        return info.context.loaders.choice.load(key)
 
 
 class ChoiceConnection(graphene.Connection):
