@@ -11,24 +11,7 @@ class AuthorDisplayNameEnum(graphene.Enum):
 
 
 class AuthorType(graphene.ObjectType):
-    # Exercise 4b.
-    # Add AuthorType.stories and Stories.author fields.
-    # - run `invoke test` to verify the changes using a test case
-    # - run `invoke start` to run queries against `localhost:8000/graphql`
-    # - sample queries available in `api/queries.graphql`
 
-    # Our ORM object, `models.Author` has attributes to resolve these fields.
-    # - a one to many field - `stories`
-
-    # Remember:
-    # - graphene.Field can take any GraphQL type (such as ObjectType). It can also take a module
-    #     string like 'api.query.passage.PassageType' to help avoid circular imports.
-    # - REFERENCE.md may be helpful to brush up on Django ORM as well!
-    # - keyword arguments need to be accepted for ConnectionField resolvers even tho graphene does
-    #     the heavy lifting
-
-    # AuthorType schema changes"
-    # - add a connection field `stories` that points a paginated connection of StoryType
     class Meta:
         interfaces = (graphene.Node, )
 
@@ -46,14 +29,19 @@ class AuthorType(graphene.ObjectType):
         }
     )
 
-    # AuthorType resolver changes:
-    # - leverage one-to-many connection from author to stories for `stories` field
+    stories = graphene.ConnectionField('api.query.story.StoryConnection')
+
     @staticmethod
     def resolve_full_name(root: models.Author, info: graphene.ResolveInfo, display: str) -> str:
         return root.full_name(display)
 
+    @staticmethod
+    def resolve_stories(root: models.Author, info: graphene.ResolveInfo, **kwargs
+                       ) -> Iterable[models.Story]:
+        return root.stories.all() # type: ignore
+
     @classmethod
-    def is_type_of(cls, root: Any, _: graphene.ResolveInfo) -> bool:
+    def is_type_of(cls, root: Any, info: graphene.ResolveInfo) -> bool:
         return isinstance(root, models.Author)
 
     @classmethod

@@ -1,9 +1,13 @@
-# Exercise 4b!
-# Test the new fields connecting AuthorType and StoryType added to the schema
+# Exercise 5.
+# Run a few queries like `storyWithAuthor` and `authorWithStories.
+# Montor the Django logs for the number of queries fired as you add more data.
 # - run `invoke start` to run queries against `localhost:8000/graphql`
 # - copy this file into the query editor window
 # - copy the below text into Query Variables
 # {"afterCursor": null, "authorId": "QXV0aG9yVHlwZTo1", "storyId": "U3RvcnlUeXBlOjI="}
+
+# Exercise 4b!
+# Test the new fields connecting AuthorType and StoryType added to the schema
 query storyWithAuthor($storyId: ID!) {
   story: node(id: $storyId) {
     id
