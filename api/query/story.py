@@ -27,6 +27,7 @@ class StoryType(graphene.ObjectType):
     )
 
     author = graphene.Field('api.query.author.AuthorType')
+    passages = graphene.ConnectionField('api.query.passage.PassageConnection')
 
     @staticmethod
     def resolve_author_name(root: models.Story, info: graphene.ResolveInfo, display: str) -> str:
@@ -39,6 +40,11 @@ class StoryType(graphene.ObjectType):
     @staticmethod
     def resolve_author(root: models.Story, info: graphene.ResolveInfo) -> models.Author:
         return root.author
+
+    @staticmethod
+    def resolve_passages(root: models.Story, info: graphene.ResolveInfo
+                        ) -> Iterable[models.Passage]:
+        return root.passages.all() # type: ignore
 
     @classmethod
     def is_type_of(cls, root: Any, info: graphene.ResolveInfo) -> bool:
